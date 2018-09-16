@@ -5,6 +5,13 @@ import logging
 import os
 import time
 
+logger = logging.getLogger('LoggingTest')
+logger.setLevel(10)
+sh = logging.StreamHandler()
+logger.addHandler(sh)
+formatter = logging.Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
+sh.setFormatter(formatter)
+
 import mxnet as mx
 from mxnet import autograd as ag
 from mxnet import gluon
@@ -47,6 +54,7 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
     beta1 = hyperparameters.get('beta1', 0.5)
     lambda1 = hyperparameters.get('lambda1', 100)
     
+    logger.info(channel_input_dirs)
     if len(hosts) == 1:
         kvstore = 'device' if num_gpus > 0 else 'local'
     else:

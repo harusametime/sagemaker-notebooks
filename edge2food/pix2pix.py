@@ -316,13 +316,11 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
     # We need only generator for endpoint
     return netG
 
-
 def save(net, model_dir):
-    # model_dir will be empty except on primary container
-    files = os.listdir(model_dir)
-    if files:
-        best = sorted(os.listdir(model_dir))[-1]
-        os.rename(os.path.join(model_dir, best), os.path.join(model_dir, 'model.params'))
+    # save the model
+    y = net(mx.sym.var('data'))
+    y.save('%s/model.json' % model_dir)
+    net.collect_params().save('%s/model.params' % model_dir)
 
 
 def get_data(path, augment, num_cpus, batch_size, data_shape, resize=-1, num_parts=1, part_index=0):

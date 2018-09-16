@@ -217,7 +217,7 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
     else:
         kvstore = 'dist_device_sync'
 
-    ctx = mx.gpu() if use_gpu else mx.cpu()
+    ctx = mx.gpu() if num_gpus > 0  else mx.cpu()
 
     # load training and validation data
     # we use the gluon.data.vision.CIFAR10 class because of its built in pre-processing logic,
@@ -310,8 +310,8 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
 
         name, acc = metric.get()
         metric.reset()
-        logging.info('\nbinary training acc at epoch %d: %s=%f' % (epoch, name, acc))
-        logging.info('time: %f' % (time.time() - tic))
+        logger.info('\nbinary training acc at epoch %d: %s=%f' % (epoch, name, acc))
+        logger.info('time: %f' % (time.time() - tic))
 
     # We need only generator for endpoint
     return netG

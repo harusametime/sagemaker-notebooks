@@ -1,6 +1,6 @@
 # sagemaker-notebooks
 
-ここでは、公式の[Amazon SageMaker example](https://github.com/awslabs/amazon-sagemaker-examples)に加えて、いくつかの日本語のexampleを用意しています。
+ここでは、公式の[Amazon SageMaker example](https://github.com/awslabs/amazon-sagemaker-examples)に加えて、いくつかの日本語のexampleを用意しています。ここのexampleに関して、コメント・問題を発見された方は、[issue](https://github.com/harusametime/sagemaker-notebooks/issues)より報告いただけるとありがたいです。
 
 ### chainer_mnist
 Chainerでmnistの手書き数字の画像を分類します。これでSageMaker上での分散学習、ハイパーパラメータ最適化、ローカルモード実行、エンドポイントの起動・推論実行など一通り試すことができます。また、対象データセットが小さいため、ml.m4.xlargeといった小さめのインスタンスでも学習可能です。

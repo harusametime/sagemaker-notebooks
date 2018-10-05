@@ -29,7 +29,7 @@ img_wd =256
 img_ht =256
 pool_size = 50
 
-def load_data(path):
+def load_data(path, with_noise = True, noise_num = 5):
     img_list = []
     for path, _, fnames in os.walk(path):
         for fname in fnames:
@@ -37,10 +37,29 @@ def load_data(path):
                 continue
             img = os.path.join(path, fname)
             img_arr = mx.image.imread(img).astype(np.float32)/127.5 - 1
-            img_arr = mx.image.imresize(img_arr, img_wd, img_ht)
-            img_arr = nd.transpose(img_arr, (2,0,1))
+            base_img_arr = mx.image.imresize(img_arr, img_wd, img_ht)
+            img_arr = nd.transpose(base_img_arr, (2,0,1))
             img_arr = img_arr.reshape((1,) + img_arr.shape)
             img_list.append(img_arr)
+            for n in range(noise_num):
+                if with_noise:
+                    aug = mx.image.LightingAug(alphastd=0.2, eigval=np.asarray([1,1,1]), eigvec=np.ones((3,3)))
+                    img_arr = aug(base_img_arr)
+                    img_arr = nd.transpose(img_arr, (2,0,1))
+                    img_arr = img_arr.reshape((1,) + img_arr.shape)
+                img_list.append(img_arr)
+            aug = mx.image.HorizontalFlipAug(p=1)
+            flip_img_arr = aug(base_img_arr)
+            img_arr = nd.transpose(flip_img_arr, (2,0,1))
+            img_arr = img_arr.reshape((1,) + img_arr.shape)
+            img_list.append(img_arr)
+            for n in range(noise_num):
+                if with_noise:
+                    aug = mx.image.LightingAug(alphastd=0.2, eigval=np.asarray([1,1,1]), eigvec=np.ones((3,3)))
+                    img_arr = aug(flip_img_arr)
+                    img_arr = nd.transpose(img_arr, (2,0,1))
+                    img_arr = img_arr.reshape((1,) + img_arr.shape)
+                img_list.append(img_arr)       
     return img_list
 
 # Define Unet generator skip block
@@ -216,7 +235,7 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
         kvstore = 'device' if num_gpus > 0 else 'local'
     else:
         kvstore = 'dist_device_sync'
-
+        
     ctx = mx.gpu() if num_gpus > 0  else mx.cpu()
 
     # load training and validation data
@@ -229,8 +248,8 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
             part_index = i
             break
     
-    input_img_list = load_data(channel_input_dirs['feature'])
-    ouputput_img_list = load_data(channel_input_dirs['label'])
+    input_img_list = load_data(channel_input_dirs['feature'], with_noise = True, noise_num = 1)
+    ouputput_img_list = load_data(channel_input_dirs['label'], with_noise = False, noise_num = 1)
     train_data = mx.io.NDArrayIter(data=[nd.concat(*input_img_list, dim=0), nd.concat(*ouputput_img_list, dim=0)],
                              batch_size=batch_size)
     
@@ -298,6 +317,7 @@ def train(current_host, hosts, num_cpus, num_gpus, channel_input_dirs, model_dir
 
             trainerG.step(batch.data[0].shape[0])
 
+
             # Print log infomation every ten batches
             if iter % 10 == 0:
                 name, acc = metric.get()
@@ -323,42 +343,6 @@ def save(net, model_dir):
     net.collect_params().save('%s/model.params' % model_dir)
 
 
-def get_data(path, augment, num_cpus, batch_size, data_shape, resize=-1, num_parts=1, part_index=0):
-    return mx.io.ImageRecordIter(
-        path_imgrec=path,
-        resize=resize,
-        data_shape=data_shape,
-        batch_size=batch_size,
-        rand_crop=augment,
-        rand_mirror=augment,
-        preprocess_threads=num_cpus,
-        num_parts=num_parts,
-        part_index=part_index)
-
-
-def get_test_data(num_cpus, data_dir, batch_size, data_shape, resize=-1):
-    return get_data(os.path.join(data_dir, "test.rec"), False, num_cpus, batch_size, data_shape, resize, 1, 0)
-
-
-def get_train_data(num_cpus, data_dir, batch_size, data_shape, resize=-1, num_parts=1, part_index=0):
-    return get_data(os.path.join(data_dir, "train.rec"), True, num_cpus, batch_size, data_shape, resize, num_parts,
-                    part_index)
-
-
-def test(ctx, net, test_data):
-    test_data.reset()
-    metric = mx.metric.Accuracy()
-
-    for i, batch in enumerate(test_data):
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-        outputs = []
-        for x in data:
-            outputs.append(net(x))
-        metric.update(label, outputs)
-    return metric.get()
-
-
 # ------------------------------------------------------------ #
 # Hosting methods                                              #
 # ------------------------------------------------------------ #
@@ -371,8 +355,11 @@ def model_fn(model_dir):
     :return: a model (in this case a Gluon network)
     """
 
-    net = models.get_model('resnet34_v2', ctx=mx.cpu(), pretrained=False, classes=10)
-    net.load_params('%s/model.params' % model_dir, ctx=mx.cpu())
+    net = gluon.nn.SymbolBlock.imports('%s/model.json' % model_dir,
+                                   ['data'], 
+                                   param_file='%s/model.params' % model_dir,
+                                   ctx=mx.cpu())
+
     return net
 
 
@@ -391,6 +378,5 @@ def transform_fn(net, data, input_content_type, output_content_type):
     parsed = json.loads(data)
     nda = mx.nd.array(parsed)
     output = net(nda)
-    prediction = mx.nd.argmax(output, axis=1)
-    response_body = json.dumps(prediction.asnumpy().tolist()[0])
+    response_body = json.dumps(output.asnumpy().tolist()[0])
     return response_body, output_content_type

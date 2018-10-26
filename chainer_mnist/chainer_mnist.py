@@ -133,6 +133,8 @@ if __name__=='__main__':
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--learning-rate', type=float, default=0.05)
     parser.add_argument('--communicator', type=str, default='pure_nccl' if num_gpus > 0 else 'naive')
+    parser.add_argument('--optimizer', type=str, default='sgd')
+    parser.add_argument('--alpha', type=float, default=0.001)
     
     # Data, model, and output directories. These are required.
     parser.add_argument('--output-data-dir', type=str, default=os.environ['SM_OUTPUT_DATA_DIR'])
@@ -168,7 +170,10 @@ if __name__=='__main__':
         chainer.cuda.get_device_from_id(device).use()
 
     # Setup an optimizer
-    optimizer = chainermn.create_multi_node_optimizer(chainer.optimizers.SGD(args.learning_rate), comm)
+    if args.optimizer == 'Adam':
+        optimizer = chainermn.create_multi_node_optimizer(chainer.optimizers.Adam(args.alpha), comm)
+    else:        
+        optimizer = chainermn.create_multi_node_optimizer(chainer.optimizers.SGD(args.learning_rate), comm)
     optimizer.setup(model)
     optimizer.add_hook(chainer.optimizer.WeightDecay(5e-4))
 

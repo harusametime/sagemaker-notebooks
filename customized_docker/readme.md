@@ -1,0 +1,8 @@
+# コンテナイメージをカスタマイズして利用
+
+## 概要
+Amazon SageMakerのnotebookインスタンス上で、Tensorflow用のコンテナイメージをビルドし、pushします。作成したコンテナイメージをnotebook上で利用します。
+
+## 注意事項
+
+ノートブックインスタンスにAmazonSageMakerFullAccessとAmazonEC2ContainerRegistryFullAccessのロールを付与してください。レジストリの作成やpushを行うためです。notebook作成前にあらかじめ用意しておく必要があります。

@@ -1,5 +1,5 @@
 # Scikit-Learnを利用した分類
-Amazon SageMakerでBring your own container (BYOC)なしに、scikit-learnの学習・推論を行うために以下を行います。
+Amazon SageMakerでBring your own container (BYOC)なしに、以下の手順でscikit-learnの学習・推論を行います。
 - コンテナ起動時にpipでscikit-learnをインストールする
   - pipでインストール可能なものについては、Docker fileの修正、ビルド、ECRへのpushなしに利用可能
   - ./souce_dirのなかにrequirements.txtをおくと、記載したライブラリ名がpipでインストールされます。scikit-learnをインストールする場合は以下のようにします。

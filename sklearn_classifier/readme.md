@@ -7,4 +7,4 @@ Amazon SageMakerでBring your own container (BYOC)なしに、以下の手順で
   scikit-learn
   ```
 - Chainerのコンテナイメージを流用する
-  - chainerのコンテナイメージは推論時にnumpyを受け取ることができますので、通常のscikit-learnと同様に利用できます。
+  - chainerのコンテナイメージでは、推論時の入力としてnumpyを受け取る関数がデフォルトで定義されており、通常のscikit-learnと同様に利用できます。もちろん、jpegなどのファイルを受け取るように、content-typeごとに関数を定義することも可能です。

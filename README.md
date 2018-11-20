@@ -13,6 +13,9 @@ Chainerでmnistの手書き数字の画像を分類します。これでSageMake
 ### transfer_learning
 Amazon SageMakerのビルトインアルゴリズムImage classificationの転移学習を利用してCaltechデータセットを学習します。ビルトインアルゴリズムの利用にはp2, p3のインスタンスが必要です。
 
+### tf_fine_tuning
+SageMaker上でのTensorflowモデルのFine Tuningを行う例として、TF SlimのResnetモデルをS3にアップロードして、SageMakerでFine Tuningします。
+
 ### xgboost_mnist
 XGBoostでmnistの手書き数字の画像を分類します。推論方法として、XGBoostのモデルをSageMaker外で読み込む方法と、SageMakerでエンドポイントを立てる方法を説明します。オープンソースのXGBoostとモデル互換性があるため、SageMaker外の環境（たとえば分析用のローカルマシンなど）で、モデルの簡単なテストや特徴量の重要度評価を行うことも可能です。
 

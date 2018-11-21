@@ -3,11 +3,10 @@ import keras
 import os
 import numpy as np
 
-from keras.models import Sequential, load_model, save_mxnet_model
+from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-
 
 if __name__ == '__main__':
     
@@ -65,11 +64,17 @@ if __name__ == '__main__':
     # convert class vectors to binary class matrices
     y_train = keras.utils.to_categorical(y_train, num_classes)
     y_test = keras.utils.to_categorical(y_test, num_classes)
-
+    
     model = Sequential()
-    model.add(Flatten(input_shape=input_shape, name ='data'))
-    model.add(Dense(1000, activation='relu'))
-    model.add(Dense(1000, activation='relu'))
+    model.add(Conv2D(32, kernel_size=(3, 3),
+                     activation='relu',
+                     input_shape=input_shape, name='data'))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
     
     model.compile(loss=keras.losses.categorical_crossentropy,

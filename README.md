@@ -27,7 +27,7 @@ XGBoostでmnistの手書き数字の画像を分類します。推論方法と�
 ## その他
 
 ### sklearn_classifier
-re:Invent2018のタイミングでScikit-Learnがデフォルトでサポートされるようになりましたので、公式githubをご覧ください。
-https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn
+re:Invent2018でScikit-Learnがデフォルトでサポートされるようになりました。公式githubをご覧ください。
+https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn  
 ~~ChainerのSageMakerコンテナを利用してScikit-Learnの学習と推論を行います。~~
 

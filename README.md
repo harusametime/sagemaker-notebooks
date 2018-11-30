@@ -10,11 +10,6 @@ Chainerでmnistの手書き数字の画像を分類します。これでSageMake
 ### edge2food
 食事画像の輪郭から食事画像をpix2pixで生成します。具体的な例として、food-101に含まれる1000枚のラーメン画像を使用して、輪郭情報を抜き出し、そこからラーメン画像を生成します。MXnet/Gluonを利用して実装しています。ネットワークが大きいためGPUでの学習を推奨します。エッジの抜き方が雑でまだ精度がでていません。
 
-## sklearn_classifier
-re:Invent2018のタイミングでScikit-Learnがデフォルトでサポートされるようになりましたので、公式githubをご覧ください。
-https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn
-~~ChainerのSageMakerコンテナを利用してScikit-Learnの学習と推論を行います。~~
-
 ### transfer_learning
 Amazon SageMakerのビルトインアルゴリズムImage classificationの転移学習を利用してCaltechデータセットを学習します。ビルトインアルゴリズムの利用にはp2, p3のインスタンスが必要です。
 
@@ -28,4 +23,11 @@ XGBoostでmnistの手書き数字の画像を分類します。推論方法と�
 
 ### random_cut_forest
 異常検知用のビルトインアルゴリズムRandom Cut Forestを利用して、ニューヨークのタクシー乗車数の異常検知を行います。実際に異常を検知した時間帯において、特殊なイベントが開催されていたことを確認し、実際の異常検知でも利用可能であることを確認します。
+
+## その他
+
+### sklearn_classifier
+re:Invent2018のタイミングでScikit-Learnがデフォルトでサポートされるようになりましたので、公式githubをご覧ください。
+https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn
+~~ChainerのSageMakerコンテナを利用してScikit-Learnの学習と推論を行います。~~
 

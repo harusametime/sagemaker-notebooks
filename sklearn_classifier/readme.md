@@ -1,3 +1,5 @@
+# 2018/11/27以降、公式のコンテナを利用可能です。
+
 # Scikit-Learnを利用した分類
 Amazon SageMakerでBring your own container (BYOC)なしに、以下の手順でscikit-learnの学習・推論を行います。
 - コンテナ起動時にpipでscikit-learnをインストールする

@@ -26,6 +26,12 @@ XGBoostでmnistの手書き数字の画像を分類します。推論方法と�
 
 ## その他
 
+### keras_mxnet
+MXNetをバックエンドとしたKerasを利用して学習し、MXNetのモデルに変換してデプロイします。2018.12時点で、Kerasの複数インスタンスの学習およびKerasモデルを直接デプロイすることはできません。MNISTデータセットを対象としたMLPとCNNによる分類を行います。
+
+### keras_tensorflow
+TensorflowをバックエンドとしたKerasを利用して学習し、Tensorflow Serving用にモデルに変換してデプロイします。2018.12時点で、Kerasの複数インスタンスの学習およびKerasモデルを直接デプロイすることはできません。MNISTデータセットを対象としたMLPとCNNによる分類を行います。
+
 ### sklearn_classifier
 re:Invent2018でScikit-Learnがデフォルトでサポートされるようになりました。公式githubをご覧ください。
 https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn  

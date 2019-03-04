@@ -2,9 +2,12 @@ import os
 
 import chainer
 import numpy as np
-
+from PIL import Image
 from chainercv.datasets import voc_bbox_label_names
 from chainercv.links import SSD300
+from six import BytesIO
+import logging
+import json
 
 
 def model_fn(model_dir):
@@ -34,19 +37,30 @@ def model_fn(model_dir):
     model = SSD300(n_fg_class=len(voc_bbox_label_names), pretrained_model=path)
     return model
     
+def input_fn(input_bytes, content_type):
+    """This function is called on the byte stream sent by the client, and is used to deserialize the
+    bytes into a Python object suitable for inference by predict_fn.
+    
+    Args:
+        input_bytes (numpy array): a numpy array containing the data serialized by the Chainer predictor
+        content_type: the MIME type of the data in input_bytes
+    Returns:
+        a NumPy array represented by input_bytes.
+    """
+    if content_type == 'application/x-npy':
+        stream = BytesIO(input_bytes)
+        return np.load(stream)
+    elif content_type == 'image/jpeg':
+        stream = Image.open(BytesIO(input_bytes))
+        return np.asarray(stream).transpose(2,0,1)
+    else:
+        raise ValueError('Content type must be application/x-npy or image/jpeg')
 
 def predict_fn(input_data, model):
     """
     This function receives a NumPy array and makes a prediction on it using the model returned
     by `model_fn`.
-    
-    The default predictor used by `Chainer` serializes input data to the 'npy' format:
-    https://docs.scipy.org/doc/numpy-1.14.0/neps/npy-format.html
-
-    The Chainer container provides an overridable pre-processing function `input_fn`
-    that accepts the serialized input data and deserializes it into a NumPy array.
-    `input_fn` is invoked before `predict_fn` and passes its return value to this function
-    (as `input_data`)
+   
     
     The Chainer container provides an overridable post-processing function `output_fn`
     that accepts this function's return value and serializes it back into `npy` format, which
@@ -66,5 +80,9 @@ def predict_fn(input_data, model):
     """
     with chainer.using_config('train', False), chainer.no_backprop_mode():
         bboxes, labels, scores = model.predict([input_data])
-        bbox, label, score = bboxes[0], labels[0], scores[0]
-        return np.array([bbox.tolist(), label, score])
+        result = {
+            'bbox': bboxes[0].tolist(),
+            'label':  labels[0].tolist(),
+            'score': scores[0].tolist()
+        }
+        return result

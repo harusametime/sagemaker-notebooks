@@ -41,6 +41,9 @@ MXNetをバックエンドとしたKerasを利用して学習し、MXNetのモ�
 ### keras_tensorflow
 TensorflowをバックエンドとしたKerasを利用して学習し、Tensorflow Serving用にモデルに変換してデプロイします。2018.12時点で、Kerasの複数インスタンスの学習およびKerasモデルを直接デプロイすることはできません。MNISTデータセットを対象としたMLPとCNNによる分類を行います。
 
+## tf_neo_ei
+Tensorflow の mobilenetをSageMaker Neoでコンパイルして推論した場合と、Elastic Inferenceを使って推論した場合で、推論にかかる時間を比較しました。
+
 ### sklearn_classifier
 re:Invent2018でScikit-Learnがデフォルトでサポートされるようになりました。公式githubをご覧ください。
 https://github.com/aws/sagemaker-python-sdk/tree/master/src/sagemaker/sklearn  

@@ -1,0 +1,7 @@
+{   
+  "Comment": "An example of creating and deploying an ML model with Amazon SageMaker",
+  "StartAt": "SageMaker CreateTrainingJob",
+  "TimeoutSeconds": 3600,
+  "States": {
+  }
+}

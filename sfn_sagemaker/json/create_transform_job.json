@@ -1,0 +1,30 @@
+{
+    "CreateTransformJob": {
+      "Type": "Task",
+      "InputPath": "$",
+      "ResultPath": "$.TrainingJobArn",
+      "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+      "Parameters": {
+        "ModelName.$": "$.model_name",
+        "TransformInput": {
+          "CompressionType": "None",
+          "ContentType": "application/x-npy",
+          "DataSource": {
+            "S3DataSource": {
+              "S3DataType": "S3Prefix",
+              "S3Uri.$": "$.data.test"
+            }
+          }
+        },
+        "TransformOutput": {
+          "S3OutputPath.$": "$.batch_result_path"
+        },
+        "TransformResources": {
+          "InstanceCount": 1,
+          "InstanceType": "ml.m4.xlarge"
+        },
+        "TransformJobName.$": "$.job_name" 
+      },
+      "End": "true"
+    }
+}

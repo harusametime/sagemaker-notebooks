@@ -1,0 +1,11 @@
+{
+    "CreateModel":{
+            "Comment": "CreateModel",
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:(region_name):(account_name):function:create_model",
+            "InputPath": "$",
+            "ResultPath": "$.CreateModelResponse",
+            "OutputPath": "$",
+            "Next": "CreateTransformJob"
+    }
+}

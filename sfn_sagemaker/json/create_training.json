@@ -1,0 +1,78 @@
+{
+"SageMaker CreateTrainingJob":{  
+      "Type":"Task",
+      "InputPath": "$",
+      "ResultPath": "$.TrainingJobArn",
+      "Resource":"arn:aws:states:::sagemaker:createTrainingJob.sync",
+      "Parameters":{  
+         "TrainingJobName.$": "$.env.sagemaker_job_name",
+         "ResourceConfig":{  
+            "InstanceCount.$": "$.train_instance_count",
+            "InstanceType.$":  "$.train_instance_type",
+            "VolumeSizeInGB": 30
+         },
+         "HyperParameters.$":
+             "$.env",
+         "AlgorithmSpecification":{  
+            "TrainingImage.$": "$.container_image",
+            "TrainingInputMode": "File"
+         },
+         "OutputDataConfig":{  
+            "S3OutputPath.$": "$.S3_bucket"
+         },
+         "StoppingCondition":{  
+            "MaxRuntimeInSeconds":100000
+         },
+         "RoleArn.$": "$.role",
+         "InputDataConfig":[  
+            {  
+               "ChannelName":"train",
+               "DataSource":{  
+                  "S3DataSource":{  
+                     "S3DataType":"S3Prefix",
+                     "S3Uri.$": "$.data.train",
+                     "S3DataDistributionType":"FullyReplicated"
+                  }
+               }
+            },
+            {  
+               "ChannelName":"valid",
+               "DataSource":{  
+                  "S3DataSource":{  
+                     "S3DataType":"S3Prefix",
+                     "S3Uri.$": "$.data.valid",
+                     "S3DataDistributionType":"FullyReplicated"
+                  }
+               }
+            }
+         ]
+      },
+      "Retry":[  
+         {  
+            "ErrorEquals":[  
+               "SageMaker.AmazonSageMakerException"
+            ],
+            "IntervalSeconds":1,
+            "MaxAttempts":100,
+            "BackoffRate":1.1
+         },
+         {  
+            "ErrorEquals":[  
+               "SageMaker.ResourceLimitExceededException"
+            ],
+            "IntervalSeconds":60,
+            "MaxAttempts":5000,
+            "BackoffRate":1
+         },
+         {  
+            "ErrorEquals":[  
+               "States.Timeout"
+            ],
+            "IntervalSeconds":1,
+            "MaxAttempts":5,
+            "BackoffRate":1
+         }
+      ],
+    "Next": "CreateModel"
+   }
+}

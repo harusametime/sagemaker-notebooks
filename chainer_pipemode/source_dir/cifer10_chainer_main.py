@@ -80,7 +80,10 @@ if __name__ == '__main__':
         return image, label
     
     ds = PipeModeDataset(channel='train', record_format='TFRecord')
-    ds = ds.repeat(1) # This dataset yields data for 1 epoch, and is called for n_epoch (implemented as for-loop)
+    num_epochs = 10
+    # This yields 40000 (training images)/64 (batch_size) * 10 (epoch) = 6250 batches (steps)
+    # Tensorflow dataset raises tf.errors.OutOfRangeError when all the batches are fed as described in training-loop
+    ds = ds.repeat(num_epochs) 
     ds = ds.prefetch(10)
     ds = ds.map(parse, num_parallel_calls=10)
     ds = ds.shuffle(buffer_size = 64) #larger than batch_size
@@ -97,31 +100,31 @@ if __name__ == '__main__':
 
     # Let's feed data from TensorFlow dataset into Chainer Neural net
     with tf.Session() as sess:
-        num_epochs = 20
-        for epoch in range(num_epochs):
-            sess.run(itr_initializer)
-            total_loss = 0
-            step = 0
-            while True:
-                try:
-                    # Draw batch from Tensorflow tensor
-                    # By "sess.run()", Tensorflow graph including "get_next" is executed.
-                    # It is NOT needed to call get_next() here.
-                    x, y = sess.run([image_batch, label_batch])
-                    
-                    # Feed into Chainer neural net
-                    pred = net(x)
-                    loss = F.softmax_cross_entropy(pred, y)
-                    net.cleargrads()
-                    loss.backward()
-                    optimizer.update()    
-                    
-                    total_loss += loss
-                    step += 1
-                  
-                except tf.errors.OutOfRangeError:
-                    break
+        sess.run(itr_initializer)
+        total_loss = 0
+        step = 0
+      
+        while True:
+            try:
+                # Draw batch from Tensorflow tensor
+                # sess.run() executes Tensorflow graph including get_next().
+                # It is NOT needed to call get_next() here.
+                x, y = sess.run([image_batch, label_batch])
 
-            avg_loss = total_loss/step
-            
-            print("Epoch: {}, Average Loss: {}".format(epoch, avg_loss))
+                # Feed into Chainer neural net
+                pred = net(x)
+                loss = F.softmax_cross_entropy(pred, y)
+                net.cleargrads()
+                loss.backward()
+                optimizer.update()    
+
+                total_loss += loss
+                step += 1
+                
+                if step % 100 == 0:
+                    avg_loss = total_loss/100
+                    print("Steps: {}, Average Loss: {}".format(step, avg_loss))
+                    total_loss = 0
+        
+            except tf.errors.OutOfRangeError:
+                break
